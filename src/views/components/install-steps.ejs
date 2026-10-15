@@ -1,0 +1,55 @@
+<% let commandIndex = 0; %>
+<section class="guide" aria-labelledby="guide-title">
+  <h2 id="guide-title">Panduan instalasi untuk <%= guide.osLabel %></h2>
+
+  <h3>Persiapan</h3>
+  <ul class="checklist">
+    <% guide.prerequisites.forEach(function (item) { %>
+    <li><%= item %></li>
+    <% }) %>
+  </ul>
+
+  <h3>Langkah</h3>
+  <ol class="steps">
+    <% guide.steps.forEach(function (step) { %>
+    <li>
+      <h4><%= step.title %><% if (step.optional) { %> <span class="tag-optional">opsional</span><% } %></h4>
+      <p><%= step.description %></p>
+      <% step.commands.forEach(function (command) { commandIndex += 1; %>
+      <div class="command">
+        <pre><code id="cmd-<%= commandIndex %>"><%= command %></code></pre>
+        <button type="button" class="copy" data-copy-target="cmd-<%= commandIndex %>">Salin</button>
+      </div>
+      <% }) %>
+    </li>
+    <% }) %>
+  </ol>
+
+  <h3>Verifikasi</h3>
+  <ul class="verify">
+    <% guide.verify.forEach(function (item) { commandIndex += 1; %>
+    <li>
+      <p><%= item.description %></p>
+      <div class="command">
+        <pre><code id="cmd-<%= commandIndex %>"><%= item.command %></code></pre>
+        <button type="button" class="copy" data-copy-target="cmd-<%= commandIndex %>">Salin</button>
+      </div>
+    </li>
+    <% }) %>
+  </ul>
+
+  <h3>Pemecahan masalah</h3>
+  <ul class="verify">
+    <% guide.troubleshooting.forEach(function (item) { %>
+    <li>
+      <p><%= item.description %></p>
+      <% if (item.command !== null) { commandIndex += 1; %>
+      <div class="command">
+        <pre><code id="cmd-<%= commandIndex %>"><%= item.command %></code></pre>
+        <button type="button" class="copy" data-copy-target="cmd-<%= commandIndex %>">Salin</button>
+      </div>
+      <% } %>
+    </li>
+    <% }) %>
+  </ul>
+</section>
