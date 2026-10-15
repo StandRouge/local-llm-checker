@@ -1,0 +1,5 @@
+<section class="fit-banner verdict-<%= fit.verdict %>" aria-labelledby="fit-title">
+  <h2 id="fit-title">Kecocokan dengan perangkat Anda: <%= fit.verdictLabel %></h2>
+  <p><%= fit.note %></p>
+  <p class="fit-meta">Perkiraan kebutuhan memori <%= fit.requiredGb %> GB untuk konteks sekitar 8K token. RAM <%= device.ramGb %> GB, VRAM <%= device.vramGb === null ? 0 : device.vramGb %> GB.</p>
+</section>

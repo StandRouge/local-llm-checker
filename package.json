@@ -1,0 +1,26 @@
+{
+  "name": "local-llm-checker",
+  "version": "1.0.0",
+  "description": "Cek spesifikasi perangkat dan temukan model AI lokal yang cocok beserta panduan instalasinya",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "audit": "npm audit --omit=dev --audit-level=low",
+    "check:clean": "node scripts/check-clean.js"
+  },
+  "dependencies": {
+    "ejs": "^7.0.1",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0"
+  }
+}
