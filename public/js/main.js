@@ -11,13 +11,19 @@ function setStatus(message) {
   statusNode.textContent = message;
 }
 
-async function runMatch(device) {
+const FALLBACK_RAM_GB = 8;
+const FALLBACK_CORES = 4;
+
+async function runMatch(device, { scroll = true, notes = [] } = {}) {
   setStatus('Mencocokkan dengan katalog model...');
   try {
     const data = await matchDevice(device);
     results.render(data, device);
-    setStatus('Pencocokan selesai. Koreksi nilai di atas bila perlu lalu cocokkan ulang.');
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const summary = ['Pencocokan selesai. Koreksi nilai di atas bila perlu lalu cocokkan ulang.', ...notes];
+    setStatus(summary.join(' '));
+    if (scroll) {
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   } catch (error) {
     const message =
       error instanceof ApiError && error.status === 429
@@ -30,13 +36,21 @@ async function runMatch(device) {
 
 async function bootstrap() {
   const detected = await detectSpecs();
+  const notes = [];
+  const ramGb = detected.reportedRam ?? FALLBACK_RAM_GB;
+  if (detected.reportedRam === null) {
+    notes.push(`RAM tidak terbaca browser, sementara dihitung ${FALLBACK_RAM_GB} GB, isi nilai sebenarnya.`);
+  }
+  const cores = detected.cores ?? FALLBACK_CORES;
+  if (detected.cores === null) {
+    notes.push(`Jumlah core tidak terbaca, sementara dihitung ${FALLBACK_CORES}.`);
+  }
   form.setValues({
-    ramGb: detected.reportedRam,
-    cores: detected.cores,
+    ramGb,
+    cores,
     os: detected.os,
     gpuRenderer: detected.gpuRenderer,
   });
-  const notes = [];
   if (detected.ramMayBeCapped) {
     notes.push('RAM dilaporkan browser dibatasi sampai 8 GB, periksa nilainya.');
   }
@@ -55,7 +69,7 @@ async function bootstrap() {
   } else {
     notes.push('GPU tidak terbaca oleh browser, isi VRAM manual bila ada GPU diskrit.');
   }
-  setStatus(`Deteksi selesai. ${notes.join(' ')}`.trim());
+  await runMatch(form.readValues(), { scroll: false, notes });
 }
 
 form.onSubmit(runMatch);
