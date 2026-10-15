@@ -36,6 +36,7 @@ export function loadConfig(env = process.env) {
     host: typeof env.HOST === 'string' && HOST_PATTERN.test(env.HOST) ? env.HOST : '127.0.0.1',
     port: toInt(env.PORT, 3000, 0, 65535),
     trustProxy: hops === 0 ? false : hops,
+    allowLan: env.ALLOW_LAN === '1',
     allowedHosts: Object.freeze([...new Set([...parseAllowedHosts(env.ALLOWED_HOSTS), ...platformHosts(env)])]),
   });
 }

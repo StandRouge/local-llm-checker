@@ -74,3 +74,33 @@ describe('konfigurasi ALLOWED_HOSTS', () => {
     }
   });
 });
+
+describe('akses jaringan lokal (ALLOW_LAN)', () => {
+  it('menerima IP privat saat ALLOW_LAN=1 dan menolak IP publik atau tidak valid', async () => {
+    const lan = await startServer({ env: { ALLOW_LAN: '1' } });
+    try {
+      const accepted = ['192.168.1.5', '10.0.0.2', '172.16.0.1', '172.31.255.254', '192.168.0.10:3000'];
+      for (const host of accepted) {
+        const response = await rawRequest(lan.port, { headers: { Host: host } });
+        assert.equal(response.status, 200, host);
+      }
+      const rejected = ['8.8.8.8', '172.32.0.1', '172.15.0.1', '192.168.1.300', '169.254.1.1', 'evil.192.168.1.5', '192.168.1', '10.0.0.1.evil.com'];
+      for (const host of rejected) {
+        const response = await rawRequest(lan.port, { headers: { Host: host } });
+        assert.equal(response.status, 421, host);
+      }
+    } finally {
+      await lan.close();
+    }
+  });
+
+  it('menolak IP privat bila ALLOW_LAN tidak aktif', async () => {
+    const strict = await startServer();
+    try {
+      const response = await rawRequest(strict.port, { headers: { Host: '192.168.1.5' } });
+      assert.equal(response.status, 421);
+    } finally {
+      await strict.close();
+    }
+  });
+});

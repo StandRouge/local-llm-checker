@@ -60,12 +60,25 @@ export function methodGuard(req, res, next) {
 
 const HOST_HEADER = /^(\[[0-9a-fA-F:]{2,45}\]|[A-Za-z0-9.-]{1,253})(?::\d{1,5})?$/;
 
-export function hostGuard(allowedHosts) {
+function isPrivateIpv4(host) {
+  const parts = host.split('.');
+  if (parts.length !== 4 || !parts.every((part) => /^\d{1,3}$/.test(part))) {
+    return false;
+  }
+  const [a, b, c, d] = parts.map(Number);
+  if ([a, b, c, d].some((value) => value > 255)) {
+    return false;
+  }
+  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+}
+
+export function hostGuard(allowedHosts, allowLan = false) {
   const allowed = new Set(allowedHosts);
   return (req, res, next) => {
     const raw = req.headers.host;
     const match = typeof raw === 'string' ? HOST_HEADER.exec(raw) : null;
-    if (match === null || !allowed.has(match[1].toLowerCase())) {
+    const name = match === null ? null : match[1].toLowerCase();
+    if (name === null || !(allowed.has(name) || (allowLan && isPrivateIpv4(name)))) {
       respondError(req, res, 421, 'misdirected_request');
       return;
     }

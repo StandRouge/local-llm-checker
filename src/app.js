@@ -29,7 +29,7 @@ export function createApp({ config = loadConfig(), limits = {}, catalog = loadCa
 
   const limiters = createLimiters(limits);
 
-  app.use(hostGuard(config.allowedHosts));
+  app.use(hostGuard(config.allowedHosts, config.allowLan));
   app.use(securityHeaders(config));
   app.use((req, res, next) => {
     res.locals.appName = 'Local LLM Checker';
