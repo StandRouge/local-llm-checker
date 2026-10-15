@@ -62,3 +62,5 @@ export function createApp({ config = loadConfig(), limits = {}, catalog = loadCa
   app.use(errorHandler);
   return app;
 }
+
+export default createApp();

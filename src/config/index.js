@@ -22,13 +22,20 @@ function toInt(value, fallback, min, max) {
   return parsed >= min && parsed <= max ? parsed : fallback;
 }
 
+function platformHosts(env) {
+  return [env.VERCEL_URL, env.VERCEL_BRANCH_URL, env.VERCEL_PROJECT_PRODUCTION_URL]
+    .filter((item) => typeof item === 'string')
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => HOSTNAME_PATTERN.test(item));
+}
+
 export function loadConfig(env = process.env) {
-  const hops = toInt(env.TRUST_PROXY, 0, 0, 10);
+  const hops = toInt(env.TRUST_PROXY, env.VERCEL === '1' ? 1 : 0, 0, 10);
   return Object.freeze({
     env: env.NODE_ENV === 'production' ? 'production' : 'development',
     host: typeof env.HOST === 'string' && HOST_PATTERN.test(env.HOST) ? env.HOST : '127.0.0.1',
     port: toInt(env.PORT, 3000, 0, 65535),
     trustProxy: hops === 0 ? false : hops,
-    allowedHosts: parseAllowedHosts(env.ALLOWED_HOSTS),
+    allowedHosts: Object.freeze([...new Set([...parseAllowedHosts(env.ALLOWED_HOSTS), ...platformHosts(env)])]),
   });
 }
